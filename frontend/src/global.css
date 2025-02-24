@@ -1,0 +1,49 @@
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+
+
+  
+
+
+
+  @layer base {
+    * {
+      @apply border-border;
+    }
+    body {
+      @apply bg-background text-foreground;
+    }
+  }
+
+
+
+
+  .video-wrapper {
+    position: relative;
+    width: 100%;
+    padding-top: 56.25%; /* 16:9 Aspect Ratio */
+    
+    overflow: hidden;
+  }
+  
+  .video-frame {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  
