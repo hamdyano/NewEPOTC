@@ -6,7 +6,7 @@ import { Loader2, Pencil, Trash2, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { createNews, deleteNews, fetchNews, updateNews } from '@/api-client';
+import { createNews, deleteNews, fetchMyNews, updateNews } from '@/api-client';
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from '@radix-ui/react-dialog';
 
 const MyNews = () => {
@@ -20,11 +20,12 @@ const MyNews = () => {
   useEffect(() => {
     loadNews();
   }, []);
+  
 
   const loadNews = async () => {
     try {
       setLoading(true);
-      const response = await fetchNews();
+      const response = await fetchMyNews();
       setNews(response.news);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('error.fetchNews'));

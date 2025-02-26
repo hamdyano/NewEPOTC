@@ -15,8 +15,6 @@ import { useAppContext } from "./contexts2/AppContext";
 import Details from "./pages/details";
 import AddingPartner from "./pages/AddingPartner";
 import AddingPhotos from "./pages/AddingPhotos";
-//import AddingPhotos from "./pages/addingPhotos";
-//import Details from "./pages/Details"; // Import the Details page
 
 const AppRoutes = () => {
   const { isLoggedIn } = useAppContext();
