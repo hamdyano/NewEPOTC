@@ -11,7 +11,8 @@ interface NewsItem {
     ar: string;
     fr: string;
   };
-  image: string;
+  image: string | null; // Modified to allow null
+  youtubeLink: string | null; // New field
   email: string;
   createdAt?: Date;
 }
@@ -27,7 +28,8 @@ const newsSchema = new mongoose.Schema<NewsItem>({
     ar: { type: String, required: true },
     fr: { type: String, required: true },
   },
-  image: { type: String, required: true }, // Storing as Base64 or URL
+  image: { type: String, required: false }, // Storing as Base64 or URL
+  youtubeLink: { type: String, required: false }, // New field
   email: { type: String, required: true }, // User who added the news
   createdAt: { type: Date, default: Date.now },
 });

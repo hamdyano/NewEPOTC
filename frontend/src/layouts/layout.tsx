@@ -1,4 +1,4 @@
-import AboutHero from "@/components/AboutHero";
+
 import Footer from "@/components/Footer";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
@@ -7,17 +7,17 @@ import Hero from "@/components/Hero";
 type Props = {
   children: React.ReactNode;
   showHero ? : boolean;
-  showAboutHero ? :String | boolean;
+  showAboutHero ? :string | boolean;
 
   
 };
 
-const Layout = ({ children , showHero = false ,showAboutHero = false}: Props) => {
+const Layout = ({ children , showHero = false }: Props) => {
   return (
     <div className=" bg-[#ffffff] flex flex-col min -h-screen">
       <Header />
       {showHero && <Hero /> }
-      {showAboutHero && <AboutHero />}
+    
 
 
       
@@ -30,8 +30,3 @@ const Layout = ({ children , showHero = false ,showAboutHero = false}: Props) =>
 
 export default Layout;
 
-
-/*  
-showHeroVideo
-
- {showHeroVideo && <HeroVideo />}*/

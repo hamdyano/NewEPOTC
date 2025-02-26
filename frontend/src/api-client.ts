@@ -16,7 +16,8 @@ export interface NewsItem {
     ar: string;
     fr: string;
   };
-  image: string;
+  image: string | null;
+  youtubeLink: string | null;
   email: string;
   createdAt: string;
 }
