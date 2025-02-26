@@ -17,36 +17,60 @@ const Footer = () => {
 
       
 
-<div>
+
+
+
+
+
+      <div>
   <h2 className="ml-14 font-semibold text-xl pb-4 text-white">
-  {t('Follow Us')}
+    {t('Follow Us')}
   </h2>
   <div className="flex gap-5 ml-12">
     {/* Facebook */}
-    <Link to="https://www.facebook.com/MoiEgy">
+    <a
+      href="https://www.facebook.com/MoiEgy"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <FaFacebook
         size={32}
         className="hover:scale-110 cursor-pointer transition duration-300 ease-in-out"
       />
-    </Link>
+    </a>
 
     {/* Twitter */}
-    <Link to="https://x.com/moiegy">
+    <a
+      href="https://x.com/moiegy"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <RiTwitterXLine
         size={32}
         className="hover:scale-110 cursor-pointer transition duration-300 ease-in-out"
       />
-    </Link>
+    </a>
 
     {/* YouTube */}
-    <Link to="https://www.youtube.com/moiegy">
+    <a
+      href="https://www.youtube.com/moiegy"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       <FaYoutube
         size={32}
         className="hover:scale-110 cursor-pointer transition duration-300 ease-in-out"
       />
-    </Link>
+    </a>
   </div>
 </div>
+
+
+
+
+
+
+
 
 
         <div>
