@@ -196,13 +196,3 @@ export default AppRoutes;
 
 
 
-/*   <Route
-        path="/CategoriesActivities"
-        element={
-          <Layout  showHeroVideo={HcategVideo}>
-            <CategoriesActivities />
-          </Layout>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" />} />
-*/
