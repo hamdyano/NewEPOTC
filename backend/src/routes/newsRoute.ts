@@ -165,6 +165,8 @@ router.put("/update-news/:id", verifyToken, upload.single("image"), async (req: 
     existingNews.paragraph = paragraph;
     existingNews.image = image;
 
+
+
     // Validate at least one media exists
 if (!req.file && !youtubeLink) {
   return res.status(400).json({ 

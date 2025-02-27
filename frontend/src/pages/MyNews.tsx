@@ -236,6 +236,7 @@ const MyNews = () => {
       const formData = new FormData();
       formData.append("title", JSON.stringify(titles));
       formData.append("paragraph", JSON.stringify(paragraphs));
+      
       if (selectedImage) formData.append("image", selectedImage);
       if (youtubeLink) formData.append("youtubeLink", youtubeLink);
 

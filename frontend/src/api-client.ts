@@ -22,6 +22,20 @@ export interface NewsItem {
   createdAt: string;
 }
 
+// api-client.ts (video section)
+
+export interface VideoItem {
+  _id: string;
+  title: {
+    en: string;
+    ar: string;
+    fr: string;
+  };
+  youtubeLink: string;
+  email: string;
+  createdAt: string;
+}
+
 // =============================================
 //               AUTHENTICATION
 // =============================================
@@ -345,6 +359,121 @@ export const fetchPhotoById = async (photoId: string) => {
   const responseBody = await response.json();
   if (!response.ok) throw new Error(responseBody.message || "Failed to fetch photo");
   return responseBody.photo;
+};
+
+
+// =============================================
+//               VIDEO MANAGEMENT
+// =============================================
+
+// Create Video with multilingual title
+export const createVideo = async (videoData: {
+  title: { en: string; ar: string; fr: string };
+  youtubeLink: string;
+}) => {
+  const response = await fetch(`${API_BASE_URL}/api/videos/add-video`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      title: JSON.stringify(videoData.title),
+      youtubeLink: videoData.youtubeLink
+    }),
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to create video");
+  }
+  return responseBody;
+};
+
+// Fetch All Videos (public route)
+export const fetchVideos = async (): Promise<{ videos: VideoItem[] }> => {
+  const response = await fetch(`${API_BASE_URL}/api/videos`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to fetch videos");
+  }
+  return responseBody;
+};
+
+// Fetch Videos Created by Authenticated User
+export const fetchMyVideos = async (): Promise<{ videos: VideoItem[] }> => {
+  const response = await fetch(`${API_BASE_URL}/api/videos/my-videos`, {
+    method: "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to fetch videos");
+  }
+  return responseBody;
+};
+
+// Fetch Single Video by ID
+export const fetchVideoById = async (videoId: string): Promise<VideoItem> => {
+  const response = await fetch(`${API_BASE_URL}/api/videos/${videoId}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error("Failed to fetch video");
+  }
+  return responseBody.video;
+};
+
+// Update Video with multilingual title
+export const updateVideo = async (
+  videoId: string,
+  videoData: {
+    title?: { en: string; ar: string; fr: string };
+    youtubeLink?: string;
+  }
+) => {
+  //const body: Record<string, any> = {};
+  const body: Record<string, string | object> = {};
+  
+  if (videoData.title) {
+    body.title = JSON.stringify(videoData.title);
+  }
+  if (videoData.youtubeLink) {
+    body.youtubeLink = videoData.youtubeLink;
+  }
+
+  const response = await fetch(`${API_BASE_URL}/api/videos/update-video/${videoId}`, {
+    method: "PUT",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to update video");
+  }
+  return responseBody;
+};
+
+// Delete Video
+export const deleteVideo = async (videoId: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/videos/delete-video/${videoId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete video");
+  }
+  return { message: "Video deleted successfully" };
 };
 
 

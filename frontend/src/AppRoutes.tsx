@@ -15,6 +15,7 @@ import { useAppContext } from "./contexts2/AppContext";
 import Details from "./pages/details";
 import AddingPartner from "./pages/AddingPartner";
 import AddingPhotos from "./pages/AddingPhotos";
+import AddingVideos from "./pages/AddingVideos";
 
 const AppRoutes = () => {
   const { isLoggedIn } = useAppContext();
@@ -130,7 +131,6 @@ const AppRoutes = () => {
         <Route path="/MyNews" element={<Navigate to="/" replace />} />
       )}
 
-
       {/* Details Page */}
       <Route
         path="/details/:id"
@@ -141,10 +141,8 @@ const AppRoutes = () => {
         }
       />
 
-
-
-        {/* Protected Route */}
-        {isLoggedIn ? (
+      {/* Protected Route */}
+      {isLoggedIn ? (
         <Route
           path="/AddingPartner"
           element={
@@ -154,12 +152,11 @@ const AppRoutes = () => {
           }
         />
       ) : (
-        <Route path="/MyNews" element={<Navigate to="/" replace />} />
+        <Route path="/" element={<Navigate to="/" replace />} />
       )}
 
-
- {/* Protected Route */}
- {isLoggedIn ? (
+      {/* Protected Route */}
+      {isLoggedIn ? (
         <Route
           path="/AddingPhotos"
           element={
@@ -169,8 +166,24 @@ const AppRoutes = () => {
           }
         />
       ) : (
-        <Route path="/MyNews" element={<Navigate to="/" replace />} />
+        <Route path="/" element={<Navigate to="/" replace />} />
       )}
+
+       {/* Protected Route */}
+       {isLoggedIn ? (
+        <Route
+          path="/AddingVideos"
+          element={
+            <Layout>
+              <AddingVideos />
+            </Layout>
+          }
+        />
+      ) : (
+        <Route path="/" element={<Navigate to="/" replace />} />
+      )}
+
+
 
 
 
@@ -184,13 +197,3 @@ const AppRoutes = () => {
 };
 
 export default AppRoutes;
-
-
-
-
-
-
-
-
-
-
