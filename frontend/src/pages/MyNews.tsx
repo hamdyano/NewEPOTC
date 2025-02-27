@@ -91,6 +91,7 @@ const MyNews = () => {
     const [youtubeLink, setYoutubeLink] = useState("");
     const [activeLang, setActiveLang] = useState(i18n.language);
     const [formError, setFormError] = useState<string | null>(null);
+    const [isFeatured, setIsFeatured] = useState(false);
 
     const isValidYouTubeUrl = (url: string) => {
       const pattern = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
@@ -124,8 +125,10 @@ const MyNews = () => {
       const formData = new FormData();
       formData.append("title", JSON.stringify(titles));
       formData.append("paragraph", JSON.stringify(paragraphs));
+      formData.append("isFeatured", isFeatured.toString());
       if (selectedImage) formData.append("image", selectedImage);
       if (youtubeLink) formData.append("youtubeLink", youtubeLink);
+      
 
       await handleCreate(formData);
     };
@@ -187,6 +190,18 @@ const MyNews = () => {
               disabled={!!youtubeLink}
             />
           </div>
+
+          <div className="flex items-center gap-2 mt-4">
+  <input
+    type="checkbox"
+    checked={isFeatured}
+    onChange={(e) => setIsFeatured(e.target.checked)}
+    className="w-4 h-4"
+  />
+  <label className="text-sm">{t("featureArticle")}</label>
+</div>
+
+
           {formError && <p className="text-red-500 text-sm">{formError}</p>}
           <Button type="submit" className="w-full">
             {t("createArticle")}

@@ -146,6 +146,8 @@ export const createNews = async (formData: FormData) => {
   return responseBody;
 };
 
+
+
 // Fetch All News (public route)
 export const fetchNews = async (): Promise<{ news: NewsItem[] }> => {
   const response = await fetch(`${API_BASE_URL}/api/news`, {
@@ -169,6 +171,21 @@ export const fetchMyNews = async (): Promise<{ news: NewsItem[] }> => {
     headers: { "Content-Type": "application/json" },
   });
 
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to fetch news");
+  }
+  return responseBody;
+};
+
+// Fetch Featured News
+export const fetchFeaturedNews = async (): Promise<{ news: NewsItem[] }> => {
+  const response = await fetch(`${API_BASE_URL}/api/news/featured-news`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+  
+  
   const responseBody = await response.json();
   if (!response.ok) {
     throw new Error(responseBody.message || "Failed to fetch news");

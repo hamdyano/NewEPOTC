@@ -24,7 +24,7 @@ const parseMultilingualField = (field: string, fieldName: string) => {
     throw new Error(`Invalid format for ${fieldName}. Expected JSON.`);
   }
 };
-
+/*
 // Add a news article
 router.post("/adding-news", verifyToken, upload.single("image"), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -32,8 +32,12 @@ router.post("/adding-news", verifyToken, upload.single("image"), async (req: Aut
       return res.status(401).json({ message: "Unauthorized: No email found" });
     }
 
+    
+
     const title = parseMultilingualField(req.body.title, "title");
     const paragraph = parseMultilingualField(req.body.paragraph, "paragraph");
+
+    
 
     if (!title.en || !title.ar || !title.fr) {
       return res.status(400).json({ message: "Title is required in all languages" });
@@ -58,6 +62,62 @@ if (!image && !youtubeLink) {
   }
 });
 
+*/
+
+router.post("/adding-news", verifyToken, upload.single("image"), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.email) {
+      return res.status(401).json({ message: "Unauthorized: No email found" });
+    }
+
+    const title = parseMultilingualField(req.body.title, "title");
+    const paragraph = parseMultilingualField(req.body.paragraph, "paragraph");
+
+    if (!title.en || !title.ar || !title.fr) {
+      return res.status(400).json({ message: "Title is required in all languages" });
+    }
+    if (!paragraph.en || !paragraph.ar || !paragraph.fr) {
+      return res.status(400).json({ message: "Paragraph is required in all languages" });
+    }
+
+    const image = req.file ? req.file.buffer.toString("base64") : null;
+    const youtubeLink = req.body.youtubeLink || null;
+    const isFeatured = req.body.isFeatured === 'true'; // New featured flag
+
+    if (!image && !youtubeLink) {
+      return res.status(400).json({ message: "Either image or YouTube link is required" });
+    }
+
+    const newNews = new News({ 
+      title, 
+      paragraph, 
+      image, 
+      youtubeLink, 
+      email: req.email,
+      isFeatured // Add featured status
+    });
+
+    await newNews.save();
+    res.status(201).json({ message: "News added successfully", news: newNews });
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message });
+  }
+});
+
+
+// Featured news
+
+
+router.get("/featured-news", async (req: Request, res: Response) => {
+  try {
+    const featuredNews = await News.find({ isFeatured: true })
+      .sort({ createdAt: -1 })
+      .limit(3);
+    res.status(200).json({ news: featuredNews });
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message });
+  }
+});
 
 
 // Get all news articles
@@ -138,7 +198,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 
-
+/*
 // Update a news article
 router.put("/update-news/:id", verifyToken, upload.single("image"), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -175,6 +235,45 @@ if (!req.file && !youtubeLink) {
 }
 
     existingNews.youtubeLink = youtubeLink;
+    await existingNews.save();
+    res.status(200).json({ message: "News updated successfully", news: existingNews });
+  } catch (error) {
+    res.status(500).json({ message: (error as Error).message });
+  }
+});*/
+
+router.put("/update-news/:id", verifyToken, upload.single("image"), async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    if (!req.email) {
+      return res.status(401).json({ message: "Unauthorized: No email found" });
+    }
+
+    const { id } = req.params;
+    const existingNews = await News.findById(id);
+    if (!existingNews) {
+      return res.status(404).json({ message: "News article not found" });
+    }
+
+    if (existingNews.email !== req.email) {
+      return res.status(403).json({ message: "Forbidden: You can only edit your own news" });
+    }
+
+    const title = req.body.title ? parseMultilingualField(req.body.title, "title") : existingNews.title;
+    const paragraph = req.body.paragraph ? parseMultilingualField(req.body.paragraph, "paragraph") : existingNews.paragraph;
+    const image = req.file ? req.file.buffer.toString("base64") : existingNews.image;
+    const youtubeLink = req.body.youtubeLink || existingNews.youtubeLink;
+
+    if (!req.file && !youtubeLink) {
+      return res.status(400).json({ message: "Either image or YouTube link must be provided" });
+    }
+
+    // Update fields including featured status
+    existingNews.title = title;
+    existingNews.paragraph = paragraph;
+    existingNews.image = image;
+    existingNews.youtubeLink = youtubeLink;
+    existingNews.isFeatured = req.body.isFeatured === 'true'; // Update featured status
+
     await existingNews.save();
     res.status(200).json({ message: "News updated successfully", news: existingNews });
   } catch (error) {

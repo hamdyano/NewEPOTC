@@ -1,19 +1,39 @@
 
-/*import Civil2 from "../assets/catActimages/Civil2.jpg";
-import Training100 from "../assets/catActimages/Training100.jpg";
-import visit1 from "../assets/catActimages/visit1.jpg";
-import workshops2 from "../assets/catActimages/workshops2.jpg";
-import RedCross1 from "../assets/catActimages/RedCross1.jpg";
-import RedCross2 from "../assets/catActimages/RedCross2.jpg";
-import appDownloadImage from "../assets/appDownload.png";*/
 
-import React, { useState, ReactNode } from "react";
+import React, { useState, ReactNode, useEffect } from "react";
 import ourtask from "../assets/ourtask.jpg";
 import TrainingTopicsAmage from "../assets/TrainingTopicsAmage.jpg";
 import OpeningVideo from "../assets/OpeningVideo.mp4";
 import VidPoster from "../assets/VidPoster.jpg";
 import trainingWithFlag from "../assets/trainingWithFlag.jpg";
 import { useTranslation } from 'react-i18next';
+import { fetchFeaturedNews } from "@/api-client";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from 'react-router-dom';
+import i18n from "@/i18n";
+
+
+interface NewsItem {
+  _id: string;
+  title: {
+    en: string;
+    ar: string;
+    fr: string;
+  };
+  paragraph: {
+    en: string;
+    ar: string;
+    fr: string;
+  };
+  image: string | null;
+  youtubeLink: string | null;
+  isFeatured?: boolean; // Add this new field
+  email: string;
+  createdAt: string;
+}
+
+
+
 
 // Updated SeeMoreText with TypeScript Props
 interface SeeMoreTextProps {
@@ -26,6 +46,7 @@ const SeeMoreText: React.FC<SeeMoreTextProps> = ({
   maxLength = 300,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  
 
   // Convert children to string for length checking
   const textContent =
@@ -41,6 +62,8 @@ const SeeMoreText: React.FC<SeeMoreTextProps> = ({
       </p>
     );
   }
+
+  
 
   return (
     <div>
@@ -60,6 +83,33 @@ const SeeMoreText: React.FC<SeeMoreTextProps> = ({
 const HomePage = () => {
 
   const { t } = useTranslation();
+  const [featuredNews, setFeaturedNews] = useState<NewsItem[]>([]);
+  const navigate = useNavigate();
+
+  const getYouTubeId = (url: string | null) => {
+    if (!url) return null;
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\n?#]+)/);
+    return match && match[1].length === 11 ? match[1] : null;
+  };
+
+  const getLocalizedContent = (content: { en: string; ar: string; fr: string }) => {
+    const lang = i18n.language as keyof typeof content;
+    return content[lang] || content.en;
+  };
+
+  // Add useEffect for fetching featured news
+useEffect(() => {
+  const loadFeaturedNews = async () => {
+    try {
+      const response = await fetchFeaturedNews();
+      setFeaturedNews(response.news);
+    } catch (err) {
+      console.error("Error loading featured news:", err);
+    }
+  };
+  loadFeaturedNews();
+}, []);
+
 
   return (
     <div className="flex flex-col gap-12">
@@ -72,6 +122,77 @@ const HomePage = () => {
         </span>
       </div>
 
+
+ {/*Featured News*/}
+
+<div className="mb-16">
+  <h2 className="text-3xl font-bold text-[#264e7c] mb-8 text-center font-['Roboto']">
+    {t("Latest News")}
+  </h2>
+
+ <div className="flex justify-center">
+          <div className="w-20 border-b-2 border-[#cf6439] my-2 mb-8"></div>
+        </div>
+
+
+  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+    {featuredNews.map((item) => {
+      const youtubeId = getYouTubeId(item.youtubeLink);
+      const localizedTitle = getLocalizedContent(item.title);
+      const localizedParagraph = getLocalizedContent(item.paragraph);
+
+      return (
+
+
+        //news added by admin 
+
+        <div 
+          key={item._id}
+         className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden relative "
+      
+        >
+          {/* Media Section */}
+          <div className="aspect-video overflow-hidden bg-gray-100">
+            {youtubeId ? (
+              <iframe
+                src={`https://www.youtube.com/embed/${youtubeId}`}
+                className="w-full h-full"
+                allowFullScreen
+                title={localizedTitle}
+              />
+            ) : (
+              item.image && (
+                <img
+                  src={`data:image/jpeg;base64,${item.image}`}
+                  alt={localizedTitle}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+              )
+            )}
+          </div>
+
+          {/* Content Section */}
+          <div className="p-4">
+            <h3 className="text-xl font-semibold text-[#264e7c] line-clamp-2 mb-2 font-['Roboto']">
+              {localizedTitle}
+            </h3>
+            <p className="text-[#264e7c] text-sm line-clamp-3 mb-4 font-['Roboto']">
+              {localizedParagraph}
+            </p>
+            <Button
+              variant="link"
+              className="text-[#cf6439] font-bold p-0 hover:underline"
+              onClick={() => navigate(`/details/${item._id}`)}
+            >
+              {t("Read More")}
+            </Button>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
 
 
       
