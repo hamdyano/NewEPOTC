@@ -136,6 +136,7 @@ useEffect(() => {
 
 
   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 px-4">
+    
     {featuredNews.map((item) => {
       const youtubeId = getYouTubeId(item.youtubeLink);
       const localizedTitle = getLocalizedContent(item.title);
@@ -146,11 +147,15 @@ useEffect(() => {
 
         //news added by admin 
 
+        
+
         <div 
           key={item._id}
          className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden relative "
       
         >
+
+          
           {/* Media Section */}
           <div className="aspect-video overflow-hidden bg-gray-100">
             {youtubeId ? (
@@ -171,6 +176,8 @@ useEffect(() => {
               )
             )}
           </div>
+
+          
 
           {/* Content Section */}
           <div className="p-4">
@@ -311,16 +318,6 @@ useEffect(() => {
 };
 
 export default HomePage;
-
-
-/*
-      <div className="flex flex-col items-center justify-center gap-4 text-center">
-        <span className="text-[#234d7e] font-bold text-3xl tracking-tighter font-['Roboto']">
-          Download EPOTC App for following up !
-        </span>
-
-        <img src={appDownloadImage} alt="App Download" />
-      </div> */
 
 
 

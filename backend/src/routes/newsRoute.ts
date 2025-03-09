@@ -24,45 +24,7 @@ const parseMultilingualField = (field: string, fieldName: string) => {
     throw new Error(`Invalid format for ${fieldName}. Expected JSON.`);
   }
 };
-/*
-// Add a news article
-router.post("/adding-news", verifyToken, upload.single("image"), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    if (!req.email) {
-      return res.status(401).json({ message: "Unauthorized: No email found" });
-    }
 
-    
-
-    const title = parseMultilingualField(req.body.title, "title");
-    const paragraph = parseMultilingualField(req.body.paragraph, "paragraph");
-
-    
-
-    if (!title.en || !title.ar || !title.fr) {
-      return res.status(400).json({ message: "Title is required in all languages" });
-    }
-    if (!paragraph.en || !paragraph.ar || !paragraph.fr) {
-      return res.status(400).json({ message: "Paragraph is required in all languages" });
-    }
-
-    const image = req.file ? req.file.buffer.toString("base64") : null;
-    const youtubeLink = req.body.youtubeLink || null;
-
-    // Validate either image or YouTube link exists
-if (!image && !youtubeLink) {
-  return res.status(400).json({ message: "Either image or YouTube link is required" });
-}
-    const newNews = new News({ title, paragraph, image, youtubeLink, email: req.email });
-    await newNews.save();
-
-    res.status(201).json({ message: "News added successfully", news: newNews });
-  } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
-  }
-});
-
-*/
 
 router.post("/adding-news", verifyToken, upload.single("image"), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -198,49 +160,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 
-/*
-// Update a news article
-router.put("/update-news/:id", verifyToken, upload.single("image"), async (req: AuthenticatedRequest, res: Response) => {
-  try {
-    if (!req.email) {
-      return res.status(401).json({ message: "Unauthorized: No email found" });
-    }
 
-    const { id } = req.params;
-    const existingNews = await News.findById(id);
-    if (!existingNews) {
-      return res.status(404).json({ message: "News article not found" });
-    }
-
-    if (existingNews.email !== req.email) {
-      return res.status(403).json({ message: "Forbidden: You can only edit your own news" });
-    }
-
-    const title = req.body.title ? parseMultilingualField(req.body.title, "title") : existingNews.title;
-    const paragraph = req.body.paragraph ? parseMultilingualField(req.body.paragraph, "paragraph") : existingNews.paragraph;
-    const image = req.file ? req.file.buffer.toString("base64") : existingNews.image;
-    const youtubeLink = req.body.youtubeLink || existingNews.youtubeLink;
-
-    existingNews.title = title;
-    existingNews.paragraph = paragraph;
-    existingNews.image = image;
-
-
-
-    // Validate at least one media exists
-if (!req.file && !youtubeLink) {
-  return res.status(400).json({ 
-    message: "Either image or YouTube link must be provided" 
-  });
-}
-
-    existingNews.youtubeLink = youtubeLink;
-    await existingNews.save();
-    res.status(200).json({ message: "News updated successfully", news: existingNews });
-  } catch (error) {
-    res.status(500).json({ message: (error as Error).message });
-  }
-});*/
 
 router.put("/update-news/:id", verifyToken, upload.single("image"), async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -263,10 +183,14 @@ router.put("/update-news/:id", verifyToken, upload.single("image"), async (req: 
     const image = req.file ? req.file.buffer.toString("base64") : existingNews.image;
     const youtubeLink = req.body.youtubeLink || existingNews.youtubeLink;
 
-    if (!req.file && !youtubeLink) {
-      return res.status(400).json({ message: "Either image or YouTube link must be provided" });
-    }
 
+    // Validate media after considering existing values
+    if (!image && !youtubeLink) {
+      return res.status(400).json({ 
+        message: "Either image or YouTube link must be maintained" 
+      });
+    }
+   
     // Update fields including featured status
     existingNews.title = title;
     existingNews.paragraph = paragraph;
@@ -315,25 +239,6 @@ export default router;
 
 
 
-/*
-
-// get news by id 
-router.get("/:id", async (req: Request, res: Response) => {
-  try {
-    const { id } = req.params;
-    const news = await News.findById(id).select("title paragraph image");
-
-    if (!news) {
-      return res.status(404).json({ message: "News not found" });
-    }
-
-    res.status(200).json({ news });
-  } catch (error) {
-    console.error("Error fetching news:", error);
-    res.status(500).json({ message: "Failed to fetch news" });
-  }
-});
-*/
 
 
 

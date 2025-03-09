@@ -1,13 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Card, CardContent, CardHeader, CardFooter } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardFooter,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Pencil, Trash2, Plus } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { createNews, deleteNews, fetchMyNews, updateNews } from "@/api-client";
-import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@radix-ui/react-dialog";
 
 interface NewsItem {
   _id: string;
@@ -17,6 +27,7 @@ interface NewsItem {
   youtubeLink: string | null;
   email: string;
   createdAt: string;
+  isFeatured?: boolean;
 }
 
 const MyNews = () => {
@@ -46,7 +57,9 @@ const MyNews = () => {
   // YouTube ID extraction helper
   const getYouTubeId = (url: string | null) => {
     if (!url) return null;
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\n?#]+)/);
+    const match = url.match(
+      /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([^&\n?#]+)/
+    );
     return match && match[1].length === 11 ? match[1] : null;
   };
 
@@ -128,7 +141,6 @@ const MyNews = () => {
       formData.append("isFeatured", isFeatured.toString());
       if (selectedImage) formData.append("image", selectedImage);
       if (youtubeLink) formData.append("youtubeLink", youtubeLink);
-      
 
       await handleCreate(formData);
     };
@@ -151,7 +163,9 @@ const MyNews = () => {
           <div>
             <Input
               value={titles[activeLang as keyof typeof titles]}
-              onChange={(e) => setTitles({ ...titles, [activeLang]: e.target.value })}
+              onChange={(e) =>
+                setTitles({ ...titles, [activeLang]: e.target.value })
+              }
               placeholder={t("title")}
               className="w-full"
             />
@@ -159,7 +173,9 @@ const MyNews = () => {
           <div>
             <textarea
               value={paragraphs[activeLang as keyof typeof paragraphs]}
-              onChange={(e) => setParagraphs({ ...paragraphs, [activeLang]: e.target.value })}
+              onChange={(e) =>
+                setParagraphs({ ...paragraphs, [activeLang]: e.target.value })
+              }
               placeholder={t("content")}
               className="w-full min-h-[100px] p-2 border rounded-md"
               rows={4}
@@ -192,15 +208,14 @@ const MyNews = () => {
           </div>
 
           <div className="flex items-center gap-2 mt-4">
-  <input
-    type="checkbox"
-    checked={isFeatured}
-    onChange={(e) => setIsFeatured(e.target.checked)}
-    className="w-4 h-4"
-  />
-  <label className="text-sm">{t("featureArticle")}</label>
-</div>
-
+            <input
+              type="checkbox"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <label className="text-sm">{t("featureArticle")}</label>
+          </div>
 
           {formError && <p className="text-red-500 text-sm">{formError}</p>}
           <Button type="submit" className="w-full">
@@ -216,6 +231,7 @@ const MyNews = () => {
     const [paragraphs, setParagraphs] = useState(newsItem.paragraph);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [youtubeLink, setYoutubeLink] = useState(newsItem.youtubeLink || "");
+    const [isFeatured, setIsFeatured] = useState(newsItem.isFeatured || false); // New state
     const [activeLang, setActiveLang] = useState(i18n.language);
     const [formError, setFormError] = useState<string | null>(null);
 
@@ -251,7 +267,10 @@ const MyNews = () => {
       const formData = new FormData();
       formData.append("title", JSON.stringify(titles));
       formData.append("paragraph", JSON.stringify(paragraphs));
-      
+      formData.append("isFeatured", isFeatured.toString());
+
+      // Keep existing media if not changing
+
       if (selectedImage) formData.append("image", selectedImage);
       if (youtubeLink) formData.append("youtubeLink", youtubeLink);
 
@@ -276,7 +295,9 @@ const MyNews = () => {
           <div>
             <Input
               value={titles[activeLang as keyof typeof titles]}
-              onChange={(e) => setTitles({ ...titles, [activeLang]: e.target.value })}
+              onChange={(e) =>
+                setTitles({ ...titles, [activeLang]: e.target.value })
+              }
               placeholder={t("title")}
               className="w-full"
             />
@@ -284,7 +305,9 @@ const MyNews = () => {
           <div>
             <textarea
               value={paragraphs[activeLang as keyof typeof paragraphs]}
-              onChange={(e) => setParagraphs({ ...paragraphs, [activeLang]: e.target.value })}
+              onChange={(e) =>
+                setParagraphs({ ...paragraphs, [activeLang]: e.target.value })
+              }
               placeholder={t("content")}
               className="w-full min-h-[100px] p-2 border rounded-md"
               rows={4}
@@ -320,6 +343,17 @@ const MyNews = () => {
               </p>
             )}
           </div>
+
+          <div className="flex items-center gap-2 mt-4">
+            <input
+              type="checkbox"
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              className="w-4 h-4"
+            />
+            <label className="text-sm">{t("featureArticle")}</label>
+          </div>
+
           {formError && <p className="text-red-500 text-sm">{formError}</p>}
           <Button type="submit" className="w-full">
             {t("saveChanges")}
@@ -364,7 +398,7 @@ const MyNews = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {news.map((item) => {
             const youtubeId = getYouTubeId(item.youtubeLink);
-            
+
             return (
               <Card
                 key={item._id}
@@ -377,7 +411,9 @@ const MyNews = () => {
                       className="w-full h-full"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
-                      title={item.title[i18n.language as keyof typeof item.title]}
+                      title={
+                        item.title[i18n.language as keyof typeof item.title]
+                      }
                     />
                   ) : (
                     <img
@@ -395,11 +431,18 @@ const MyNews = () => {
                 </CardHeader>
                 <CardContent>
                   <p className="text-gray-600 line-clamp-3">
-                    {item.paragraph[i18n.language as keyof typeof item.paragraph]}
+                    {
+                      item.paragraph[
+                        i18n.language as keyof typeof item.paragraph
+                      ]
+                    }
                   </p>
                 </CardContent>
                 <CardFooter className="gap-2 justify-end">
-                  <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                  <Dialog
+                    open={isEditDialogOpen}
+                    onOpenChange={setIsEditDialogOpen}
+                  >
                     <DialogTrigger asChild>
                       <Button
                         variant="outline"
