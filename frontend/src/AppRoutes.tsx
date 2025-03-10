@@ -16,7 +16,7 @@ import Details from "./pages/details";
 import AddingPartner from "./pages/AddingPartner";
 import AddingPhotos from "./pages/AddingPhotos";
 import AddingVideos from "./pages/AddingVideos";
-
+import AddingHome from "./pages/AddingHome";
 const AppRoutes = () => {
   const { isLoggedIn } = useAppContext();
 
@@ -182,6 +182,22 @@ const AppRoutes = () => {
       ) : (
         <Route path="/" element={<Navigate to="/" replace />} />
       )}
+
+
+  {/* Protected Route */}
+  {isLoggedIn ? (
+        <Route
+          path="/AddingHome"
+          element={
+            <Layout>
+              <AddingHome />
+            </Layout>
+          }
+        />
+      ) : (
+        <Route path="/" element={<Navigate to="/" replace />} />
+      )}
+
 
 
 

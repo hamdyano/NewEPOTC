@@ -129,31 +129,7 @@ const MainNav = () => {
       <span className="flex space-x-2">
         {isLoggedIn ? (
           <>
-           <Link
-              className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
-              to="/AddingVideos"
-            >
-              {t("Adding Videos")}
-            </Link>
-
-            <Link
-              className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
-              to="/AddingPhotos"
-            >
-              {t("Adding Photos")}
-            </Link>
-            <Link
-              className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
-              to="/AddingPartner"
-            >
-              {t("Adding Partner")}
-            </Link>
-            <Link
-              className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
-              to="/MyNews"
-            >
-              {t("Adding News")}
-            </Link>
+        
             <UsernameMenu />
           </>
         ) : (
@@ -205,4 +181,37 @@ export default MainNav;
 
 
 
+/*  <Link
+              className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
+              to="/AddingHome"
+            >
+              {t("Adding Home Page")}
+            </Link>
+           <Link
+              className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
+              to="/AddingVideos"
+            >
+              {t("Adding Videos")}
+            </Link>
 
+            <Link
+              className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
+              to="/AddingPhotos"
+            >
+              {t("Adding Photos")}
+            </Link>
+            <Link
+              className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
+              to="/AddingPartner"
+            >
+              {t("Adding Partner")}
+            </Link>
+
+            <Link
+              className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
+              to="/MyNews"
+            >
+              {t("Adding News")}
+            </Link>
+
+*/

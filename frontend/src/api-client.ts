@@ -22,6 +22,23 @@ export interface NewsItem {
   createdAt: string;
 }
 
+interface TopicItem {
+  _id: string;
+  title: {
+    en: string;
+    ar: string;
+    fr: string;
+  };
+  paragraph: {
+    en: string;
+    ar: string;
+    fr: string;
+  };
+  image: string | null;
+  youtubeLink: string | null;
+  email: string;
+  createdAt: string;
+}
 // api-client.ts (video section)
 
 export interface VideoItem {
@@ -495,7 +512,96 @@ export const deleteVideo = async (videoId: string) => {
 
 
 
+// =============================================
+//               TOPIC MANAGEMENT
+// =============================================
 
+// Create Topic with multilingual support
+export const createTopic = async (formData: FormData) => {
+  const response = await fetch(`${API_BASE_URL}/api/home/adding-topic`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to create topic");
+  }
+  return responseBody;
+};
+
+// Fetch All Topics (public route)
+export const fetchTopics = async (): Promise<{ topics: TopicItem[] }> => {
+  const response = await fetch(`${API_BASE_URL}/api/home`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to fetch topics");
+  }
+  return responseBody;
+};
+
+// Fetch Topics Created by Authenticated User
+export const fetchMyTopics = async (): Promise<{ topics: TopicItem[] }> => {
+  const response = await fetch(`${API_BASE_URL}/api/home/my-topics`, {
+    method: "GET",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to fetch topics");
+  }
+  return responseBody;
+};
+
+
+// Fetch Single Topic by ID
+export const fetchTopicById = async (topicId: string): Promise<TopicItem> => {
+  const response = await fetch(`${API_BASE_URL}/api/home/${topicId}`, {
+    method: "GET",
+    headers: { "Content-Type": "application/json" },
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error("Failed to fetch topic");
+  }
+  return responseBody.topic;
+};
+
+// Update Topic with multilingual support
+export const updateTopic = async (topicId: string, formData: FormData) => {
+  const response = await fetch(`${API_BASE_URL}/api/home/update-topic/${topicId}`, {
+    method: "PUT",
+    credentials: "include",
+    body: formData,
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) {
+    throw new Error(responseBody.message || "Failed to update topic");
+  }
+  return responseBody;
+}; 
+
+// Delete Topic
+export const deleteTopic = async (topicId: string) => {
+  const response = await fetch(`${API_BASE_URL}/api/home/delete-topic/${topicId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to delete topic");
+  }
+  return { message: "Topic deleted successfully" };
+};
 
 
 

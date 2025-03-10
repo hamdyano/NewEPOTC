@@ -10,6 +10,7 @@ import partnershipRoute from "./routes/partnershipRoute";
 import photosRoute from "./routes/photosRoute";
 import path from "path";
 import videosRoute from "./routes/videosRoute";
+import homeRoute from "./routes/homeRoute";
 
 mongoose.connect(process.env.MONGODB_CONNECTION_STRING as string).then(() => console.log("connected to database"));
 
@@ -47,6 +48,7 @@ app.use("/api/news",newsRoute)
 app.use("/api/partner",partnershipRoute)
 app.use("/api/allphotos",photosRoute)
 app.use("/api/videos",videosRoute)
+app.use("/api/home",homeRoute)
 
 
 

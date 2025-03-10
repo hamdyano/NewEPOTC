@@ -1,36 +1,36 @@
 import React, { useState, ReactNode, useEffect } from "react";
-import Training100 from "../assets/Training100.jpg";
-import trainings from "../assets/trainings.jpg";
-import trainingWithFlag from "../assets/trainingWithFlag.jpg";
 import { useTranslation } from "react-i18next";
-import { fetchFeaturedNews } from "@/api-client";
+import { fetchFeaturedNews, fetchTopics } from "@/api-client";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import i18n from "@/i18n";
 
-interface NewsItem {
+
+
+interface SeeMoreTextProps {
+  children: string | ReactNode;
+  maxLength?: number;
+}
+
+export interface NewsItem {
   _id: string;
-  title: {
-    en: string;
-    ar: string;
-    fr: string;
-  };
-  paragraph: {
-    en: string;
-    ar: string;
-    fr: string;
-  };
+  title: { en: string; ar: string; fr: string };
+  paragraph: { en: string; ar: string; fr: string };
   image: string | null;
   youtubeLink: string | null;
-  isFeatured?: boolean; // Add this new field
+  isFeatured?: boolean;
   email: string;
   createdAt: string;
 }
 
-// Updated SeeMoreText with TypeScript Props
-interface SeeMoreTextProps {
-  children: string | ReactNode;
-  maxLength?: number;
+export interface TopicItem {
+  _id: string;
+  title: { en: string; ar: string; fr: string };
+  paragraph: { en: string; ar: string; fr: string };
+  image: string | null;
+  youtubeLink: string | null;
+  email: string;
+  createdAt: string;
 }
 
 const SeeMoreText: React.FC<SeeMoreTextProps> = ({
@@ -38,20 +38,10 @@ const SeeMoreText: React.FC<SeeMoreTextProps> = ({
   maxLength = 300,
 }) => {
   const [isExpanded, setIsExpanded] = useState(false);
+  const textContent = typeof children === "string" ? children : "";
 
-  // Convert children to string for length checking
-  const textContent =
-    typeof children === "string"
-      ? children
-      : React.Children.toArray(children).join("");
-
-  // If text is shorter than maxLength, show full text
   if (textContent.length <= maxLength) {
-    return (
-      <p className="text-[#264e7c] text-1xl tracking-tighter font-['Roboto']">
-        {children}
-      </p>
-    );
+    return <p className="text-[#264e7c] text-1xl tracking-tighter font-['Roboto']">{children}</p>;
   }
 
   return (
@@ -61,7 +51,7 @@ const SeeMoreText: React.FC<SeeMoreTextProps> = ({
       </p>
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="text-[#cf6439] font-bold mt-2 hover:underline"
+        className="text-[#cf6439] font-bold mt-2 hover-underline"
       >
         {isExpanded ? "See Less" : "See More"}
       </button>
@@ -72,6 +62,8 @@ const SeeMoreText: React.FC<SeeMoreTextProps> = ({
 const HomePage = () => {
   const { t } = useTranslation();
   const [featuredNews, setFeaturedNews] = useState<NewsItem[]>([]);
+  const [topics, setTopics] = useState<TopicItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const getYouTubeId = (url: string | null) => {
@@ -91,29 +83,74 @@ const HomePage = () => {
     return content[lang] || content.en;
   };
 
-  // Add useEffect for fetching featured news
   useEffect(() => {
-    const loadFeaturedNews = async () => {
+    const loadData = async () => {
       try {
-        const response = await fetchFeaturedNews();
-        setFeaturedNews(response.news);
+        setLoading(true);
+        const [newsResponse, topicsResponse] = await Promise.all([
+          fetchFeaturedNews(),
+          fetchTopics()
+        ]);
+        setFeaturedNews(newsResponse.news);
+        setTopics(topicsResponse.topics);
       } catch (err) {
-        console.error("Error loading featured news:", err);
+        console.error("Error loading data:", err);
+      } finally {
+        setLoading(false);
       }
     };
-    loadFeaturedNews();
+    loadData();
   }, []);
 
+  const renderMedia = (item: NewsItem | TopicItem) => {
+    const youtubeId = getYouTubeId(item.youtubeLink);
+    
+    return youtubeId ? (
+      <div className="w-full aspect-video">
+        <iframe
+          src={`https://www.youtube.com/embed/${youtubeId}`}
+          className="w-full h-full rounded-lg"
+          allowFullScreen
+          title={getLocalizedContent(item.title)}
+        />
+      </div>
+    ) : (
+      item.image && (
+        <img
+          src={`data:image/jpeg;base64,${item.image}`}
+          alt={getLocalizedContent(item.title)}
+          className="w-full h-full object-cover rounded-lg aspect-video"
+          loading="lazy"
+        />
+      )
+    );
+  };
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#cf6439]"></div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col gap-12">
-      <div className="bg-[#133355] rounded-2xl shadow-md py-12 flex flex-col gap-5 text-center -mt-24 ">
-        <h1 className="text-4xl font-bold tracking-tight text-white font-['Roboto']">
+    <div className="flex flex-col gap-12 container mx-auto px-4">
+      {/* Hero Section */}
+      <div className="bg-[#133355] rounded-2xl shadow-md py-12 text-center mt-[-6rem]">
+        <h1 className="text-4xl font-bold text-white font-['Roboto'] mb-4">
           {t("homepage.title")}
         </h1>
-        <span className="text-white text-xl font-['Roboto']">
+        <p className="text-white text-xl font-['Roboto']">
           {t("homepage.subtitle")}
-        </span>
+        </p>
       </div>
+
+
+
+
+
+
 
       {/*Featured News*/}
 
@@ -182,113 +219,49 @@ const HomePage = () => {
         </div>
       </div>
 
-      <div className="bg-cover bg-center hover:opacity-100 hover:scale-105 transition-all duration-300 ease-in-out flex flex-col md:flex-row items-center">
-        {/* Text */}
-        <div className="w-full md:w-1/2 flex flex-col justify-center gap-4 p-6 text-center md:text-left">
-          <h2 className="text-[#264e7c] font-bold text-4xl tracking-tighter font-['Roboto']">
-            {t(
-              "What is The Egyptian Peacekeeping Operations Training Center ?"
-            )}
-          </h2>
-          <div className="w-24 border-b-2 border-[#cf6439]"></div>
-          <p className="text-[#264e7c] text-1xl tracking-tighter font-['Roboto']">
-            {t(
-              "Egypt is keen on enhancing a sustained approach to maintain global peace and security, promoting peace and addressing the scourge of wars, armed conflicts, violence and terrorism. The Ministry of Interior established the Egyptian Peacekeeping Operations Training Center (EPOTC) in Police Academy to qualify Police personnel for effective contribution in peacekeeping and peacebuilding in conflict zones as an approach towards the global humanitarian role of peacekeepers"
-            )}
-          </p>
-        </div>
+      {/* =============================================
+      //             Main sections (Topics)
+      // ============================================= */}
+      <div className="space-y-16">
+        {topics.map((topic, index) => {
+          const isEven = index % 2 === 0;
+          const localizedTitle = getLocalizedContent(topic.title);
+          const localizedContent = getLocalizedContent(topic.paragraph);
 
-        {/* Image */}
-        <div className="w-full md:w-3/5">
-          <img
-            src={trainingWithFlag}
-            alt="Description"
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
+          return (
+            <div 
+              key={topic._id}
+              className={`flex flex-col gap-8 md:gap-12 ${
+                isEven ? "md:flex-row" : "md:flex-row-reverse"
+              }`}
+            >
+              {/* Media Column */}
+              <div className="w-full md:w-1/2 shadow-xl rounded-xl overflow-hidden">
+                {renderMedia(topic)}
+              </div>
 
-      <div className="bg-cover bg-center hover:opacity-100 hover:scale-105 transition-all duration-300 ease-in-out flex flex-col md:flex-row-reverse items-center">
-        <div className="w-full md:w-1/2 flex flex-col justify-center gap-4 p-6 text-center md:text-left">
-          <h2 className="text-[#264e7c] font-bold text-4xl tracking-tighter font-['Roboto']">
-            {t("Mission")}
-          </h2>
-          <div className="w-24 border-b-2 border-[#cf6439] my-2"></div>
-          <SeeMoreText>
-            {t(
-              "To conduct training, studies, research and specialized programs for peacekeepers in all aspects of peacekeeping operations in order to improve the effectiveness of their contributions and cope with the evolving field requirements."
-            )}
-          </SeeMoreText>
-        </div>
+              {/* Content Column */}
+              <div className="w-full md:w-1/2 flex flex-col justify-center">
+                <h2 className="text-3xl font-bold text-[#264e7c] mb-4">
+                  {localizedTitle}
+                </h2>
+                <div className="w-24 h-1 bg-[#cf6439] mb-6"></div>
+                <SeeMoreText maxLength={400}>
+                  {localizedContent}
+                </SeeMoreText>
+            
+              </div>
+            </div>
+          );
+        })}
 
-        <div className="w-full md:w-3/5 relative">
-          <div
-            id="loading-spinner"
-            className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 z-10"
-          >
-            <div className="loader"></div>
-          </div>
+        {/* Original Static Sections */}
 
-          <iframe
-            src="https://www.youtube-nocookie.com/embed/7hOUqjTCV90"
-            title="YouTube video player"
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-            className="w-full h-full object-cover aspect-video"
-            onLoad={() => {
-              const spinner = document.getElementById("loading-spinner");
-              if (spinner) spinner.style.display = "none";
-            }}
-          ></iframe>
-        </div>
-      </div>
-
-      <div className="bg-cover bg-center hover:opacity-100 hover:scale-105 transition-all duration-300 ease-in-out flex flex-col md:flex-row items-center">
-        <div className="w-full md:w-4/5 flex flex-col justify-center gap-4 p-6 text-center md:text-left">
-          <h2 className="text-[#264e7c] font-bold text-4xl tracking-tighter font-['Roboto']">
-            {t("Task")}
-          </h2>
-          <div className="w-24 border-b-2 border-[#cf6439]"></div>
-          <SeeMoreText>
-            {t(
-              "The center carries out the following missions : Preparing and training national and international cadres to work in peacekeeping missions and providing full support to both male and female participants interested in joining. Organizing various activities (training courses, seminars, conferences, workshops, etc.) in coordination with national entities, friendly countries, and organizations (international and regional) to enhance the role of police components in peacekeeping operations. Conducting studies and research related to all aspects of UN mission operations, reviewing the challenges faced by participants, and exploring ways to overcome them. Collaborating in training and exchanging expertise with similar entities (internationally, regionally, and locally) to enhance the performance of UN personnel."
-            )}
-          </SeeMoreText>
-        </div>
-
-        <div className="w-full md:w-3/5">
-          <img
-            src={Training100}
-            alt="Our Task"
-            className="w-full h-full object-cover"
-          />
-        </div>
-      </div>
-
-      <div className="bg-cover bg-center hover:opacity-100 hover:scale-105 transition-all duration-300 ease-in-out flex flex-col md:flex-row-reverse items-center">
-        <div className="w-full md:w-4/5 flex flex-col justify-center gap-4 p-6 text-center md:text-left">
-          <h2 className="text-[#264e7c] font-bold text-4xl tracking-tighter font-['Roboto']">
-            {t("Training Topics")}
-          </h2>
-          <div className="w-24 border-b-2 border-[#cf6439]"></div>
-          <SeeMoreText maxLength={400}>
-            {t(
-              "EPOTC conducts peacekeeping training, studies and research, as follows: • Qualifying police personnel for participating in Peacekeeping operations. • Protection of Civilians in armed conflicts. • Disarmament, Demobilization and Reintegration (DDR) of (ex-combatants/fighters) at mission host countries. • Capacity building of local police at mission host countries. • Political and ethnic conflict analysis and mediation. • Preventing radicalization and extremism leading to terrorism. • Monitoring elections at mission host countries. • Correctional institutions reform and security. • Countering illegal immigration, human trafficking, and transnational organized crime. • Qualifying female personnel for participating in Peacekeeping operations. • Improvised Explosive Devices (IEDs) detection. • First aid in police operations."
-            )}
-          </SeeMoreText>
-        </div>
-
-        <div className="w-full md:w-3/5">
-          <img
-            src={trainings}
-            alt="Training Topics"
-            className="w-full h-full object-cover"
-          />
-        </div>
+        
       </div>
     </div>
   );
 };
 
 export default HomePage;
+
