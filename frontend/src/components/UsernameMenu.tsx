@@ -37,10 +37,13 @@ const UsernameMenu = () => {
       <DropdownMenuTrigger className="flex items-center px-3 font-bold text-white">
         <CircleUserRound className="text-white" />
         {user ? (
-          <span className="ml-2">{user?.email || "Admin"}</span>
+          <span className="ml-2">{user?.email + "  -  Admin"}</span>
+          
         ) : (
           <span className="ml-2">Guest</span>
         )}
+
+        
       </DropdownMenuTrigger>
       <DropdownMenuContent className="bg-white content-center">
         {isLoggedIn && (

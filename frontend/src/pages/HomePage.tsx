@@ -13,7 +13,7 @@ interface SeeMoreTextProps {
 }
 
 export interface NewsItem {
-  _id: string;
+  id: number;
   title: { en: string; ar: string; fr: string };
   paragraph: { en: string; ar: string; fr: string };
   image: string | null;
@@ -24,7 +24,7 @@ export interface NewsItem {
 }
 
 export interface TopicItem {
-  _id: string;
+  id: number;
   title: { en: string; ar: string; fr: string };
   paragraph: { en: string; ar: string; fr: string };
   image: string | null;
@@ -173,7 +173,7 @@ const HomePage = () => {
               //news added by admin
 
               <div
-                key={item._id}
+                key={item.id}
                 className="bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden relative "
               >
                 {/* Media Section */}
@@ -208,7 +208,7 @@ const HomePage = () => {
                   <Button
                     variant="link"
                     className="text-[#cf6439] font-bold p-0 hover:underline"
-                    onClick={() => navigate(`/details/${item._id}`)}
+                    onClick={() => navigate(`/details/${item.id}`)}
                   >
                     {t("Read More")}
                   </Button>
@@ -230,7 +230,7 @@ const HomePage = () => {
 
           return (
             <div 
-              key={topic._id}
+              key={topic.id}
               className={`flex flex-col gap-8 md:gap-12 ${
                 isEven ? "md:flex-row" : "md:flex-row-reverse"
               }`}

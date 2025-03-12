@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { fetchNewsById } from '@/api-client';
 
 interface NewsItem {
-  _id: string;
+  id: number;
   title: { en: string; ar: string; fr: string };
   paragraph: { en: string; ar: string; fr: string };
   image: string | null;
@@ -13,7 +13,11 @@ interface NewsItem {
 
 const Details = () => {
   const { t, i18n } = useTranslation();
+
   const { id } = useParams<{ id: string }>();
+  console.log("Route param id:", id);
+
+  
   const [news, setNews] = useState<NewsItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -28,6 +32,12 @@ const Details = () => {
     const loadNews = async () => {
       try {
         setLoading(true);
+        setLoading(true);
+      // Ensure id is a numeric string
+      const numericId = Number(id);
+      if (isNaN(numericId)) {
+        throw new Error("Invalid news ID");
+      }
         const newsData = await fetchNewsById(id!);
         setNews(newsData);
       } catch (err) {

@@ -9,6 +9,19 @@ import "react-toastify/dist/ReactToastify.css";
 import { createVideo, deleteVideo, fetchMyVideos, updateVideo, VideoItem } from "@/api-client";
 import { Dialog, DialogContent, DialogTitle, DialogTrigger } from "@radix-ui/react-dialog";
 
+
+interface VideoItem {
+  id: number; // Changed from _id
+  title: { en: string; ar: string; fr: string };
+  youtubeLink: string | null;
+  email: string;
+  createdAt: string;
+  videoId:number;
+
+}
+
+
+
 const AddingVideos = () => {
   const { t, i18n } = useTranslation();
   const [videos, setVideos] = useState<VideoItem[]>([]);
@@ -49,11 +62,11 @@ const AddingVideos = () => {
     }
   };
 
-  const handleDelete = async (videoId: string) => {
+  const handleDelete = async (videoId: number) => {
     if (window.confirm(t("confirm.deleteVideo"))) {
       try {
         await deleteVideo(videoId);
-        setVideos(videos.filter((item) => item._id !== videoId));
+        setVideos(videos.filter((item) => item.id !== videoId));
         toast.success(t("success.videoDeleted"));
       } catch (err) {
         toast.error(err instanceof Error ? err.message : t("error.deleteVideo"));
@@ -61,7 +74,7 @@ const AddingVideos = () => {
     }
   };
 
-  const handleUpdate = async (videoId: string, videoData: { title?: { en: string; ar: string; fr: string }; youtubeLink?: string }) => {
+  const handleUpdate = async (videoId: number, videoData: { title?: { en: string; ar: string; fr: string }; youtubeLink?: string }) => {
     try {
       await updateVideo(videoId, videoData);
       await loadVideos();
@@ -176,7 +189,7 @@ const AddingVideos = () => {
         return;
       }
 
-      await handleUpdate(videoItem._id, { title: titles, youtubeLink });
+      await handleUpdate(videoItem.id, { title: titles, youtubeLink });
     };
 
     return (
@@ -258,7 +271,7 @@ const AddingVideos = () => {
             
             return (
               <Card
-                key={item._id}
+                key={item.id}
                 className="overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="aspect-video overflow-hidden bg-gray-100">
@@ -289,14 +302,14 @@ const AddingVideos = () => {
                         {t("edit")}
                       </Button>
                     </DialogTrigger>
-                    {editingVideo && editingVideo._id === item._id && (
+                    {editingVideo && editingVideo.id === item.id && (
                       <EditDialog videoItem={editingVideo} />
                     )}
                   </Dialog>
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDelete(item._id)}
+                    onClick={() => handleDelete(item.id)}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     {t("delete")}

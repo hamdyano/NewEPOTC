@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import multer from "multer";
-import Topic from "../models/homeModel";
 import verifyToken from "../middleware/authMiddel";
-import mongoose from "mongoose";
+import prisma from "../prisma";
+
 
 const router = express.Router();
 
@@ -10,12 +10,10 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
 
-// Extended Request type with email
 interface AuthenticatedRequest extends Request {
   email?: string;
 }
 
-// Multilingual field parser
 const parseMultilingualField = (field: string, fieldName: string) => {
   try {
     return JSON.parse(field);
@@ -43,31 +41,33 @@ router.post("/adding-topic", verifyToken, upload.single("image"), async (req: Au
     const image = req.file ? req.file.buffer.toString("base64") : null;
     const youtubeLink = req.body.youtubeLink || null;
 
-
     if (!image && !youtubeLink) {
       return res.status(400).json({ message: "Media required (image or YouTube)" });
     }
 
-    const newTopic = new Topic({ 
-      title, 
-      paragraph, 
-      image, 
-      youtubeLink, 
-      email: req.email,
+    const newTopic = await prisma.topic.create({
+      data: {
+        title: title as Record<string, string>,
+        paragraph: paragraph as Record<string, string>,
+        image,
+        youtubeLink,
+        user: { connect: { email: req.email } }
+      }
     });
 
-    await newTopic.save();
     res.status(201).json({ message: "Topic created", topic: newTopic });
   } catch (error) {
     res.status(500).json({ message: (error as Error).message });
   }
 });
 
-
 // Get all topics
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const topics = await Topic.find().sort({ createdAt: -1 });
+    const topics = await prisma.topic.findMany({
+      orderBy: { createdAt: "desc" },
+      include: { user: { select: { email: true } } } // Added closing bracket here
+    });
     res.status(200).json({ topics });
   } catch (error) {
     console.error("Fetch topics error:", error);
@@ -80,7 +80,10 @@ router.get("/my-topics", verifyToken, async (req: AuthenticatedRequest, res: Res
   try {
     if (!req.email) return res.status(401).json({ message: "Unauthorized" });
     
-    const topics = await Topic.find({ email: req.email }).sort({ createdAt: -1 });
+    const topics = await prisma.topic.findMany({
+      where: { userEmail: req.email },
+      orderBy: { createdAt: "desc" }
+    });
     res.status(200).json({ topics });
   } catch (error) {
     res.status(500).json({ message: (error as Error).message });
@@ -90,28 +93,27 @@ router.get("/my-topics", verifyToken, async (req: AuthenticatedRequest, res: Res
 // Get single topic
 router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    
-    if (!mongoose.Types.ObjectId.isValid(id)) {
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) {
       return res.status(400).json({ message: "Invalid ID format" });
     }
 
-    const topic = await Topic.findById(id).select("title paragraph image youtubeLink");
-    if (!topic) return res.status(404).json({ message: "Topic not found" });
-
-    res.status(200).json({ 
-      topic: {
-        _id: topic._id,
-        title: topic.title,
-        paragraph: topic.paragraph,
-        image: topic.image,
-        youtubeLink: topic.youtubeLink
+    const topic = await prisma.topic.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        title: true,
+        paragraph: true,
+        image: true,
+        youtubeLink: true,
+        userEmail: true
       }
     });
+
+    if (!topic) return res.status(404).json({ message: "Topic not found" });
+
+    res.status(200).json({ topic });
   } catch (error) {
-    if (error instanceof mongoose.Error.CastError) {
-      return res.status(400).json({ message: "Invalid ID format" });
-    }
     res.status(500).json({ message: "Server error", error: (error as Error).message });
   }
 });
@@ -121,11 +123,15 @@ router.put("/update-topic/:id", verifyToken, upload.single("image"), async (req:
   try {
     if (!req.email) return res.status(401).json({ message: "Unauthorized" });
 
-    const { id } = req.params;
-    const existing = await Topic.findById(id);
-    if (!existing) return res.status(404).json({ message: "Topic not found" });
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid ID format" });
 
-    if (existing.email !== req.email) {
+    const existing = await prisma.topic.findUnique({
+      where: { id },
+    });
+
+    if (!existing) return res.status(404).json({ message: "Topic not found" });
+    if (existing.userEmail !== req.email) {
       return res.status(403).json({ message: "Can only edit own topics" });
     }
 
@@ -138,14 +144,17 @@ router.put("/update-topic/:id", verifyToken, upload.single("image"), async (req:
       return res.status(400).json({ message: "Media required (image/YouTube)" });
     }
 
-    existing.title = title;
-    existing.paragraph = paragraph;
-    existing.image = image;
-    existing.youtubeLink = youtubeLink;
-  
+    const updatedTopic = await prisma.topic.update({
+      where: { id },
+      data: {
+        title: title as Record<string, string>,
+        paragraph: paragraph as Record<string, string>,
+        image,
+        youtubeLink
+      }
+    });
 
-    await existing.save();
-    res.status(200).json({ message: "Topic updated", topic: existing });
+    res.status(200).json({ message: "Topic updated", topic: updatedTopic });
   } catch (error) {
     res.status(500).json({ message: (error as Error).message });
   }
@@ -156,15 +165,22 @@ router.delete("/delete-topic/:id", verifyToken, async (req: AuthenticatedRequest
   try {
     if (!req.email) return res.status(401).json({ message: "Unauthorized" });
 
-    const { id } = req.params;
-    const existing = await Topic.findById(id);
-    if (!existing) return res.status(404).json({ message: "Topic not found" });
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid ID format" });
 
-    if (existing.email !== req.email) {
+    const existing = await prisma.topic.findUnique({
+      where: { id },
+    });
+
+    if (!existing) return res.status(404).json({ message: "Topic not found" });
+    if (existing.userEmail !== req.email) {
       return res.status(403).json({ message: "Can only delete own topics" });
     }
 
-    await Topic.findByIdAndDelete(id);
+    await prisma.topic.delete({
+      where: { id }
+    });
+
     res.status(200).json({ message: "Topic deleted" });
   } catch (error) {
     res.status(500).json({ message: (error as Error).message });
@@ -172,3 +188,8 @@ router.delete("/delete-topic/:id", verifyToken, async (req: AuthenticatedRequest
 });
 
 export default router;
+
+
+
+
+

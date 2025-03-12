@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 interface NewsItem {
-  _id: string;
+  id: number;
   title: { en: string; ar: string; fr: string };
   paragraph: { en: string; ar: string; fr: string };
   image: string | null;
@@ -84,7 +84,7 @@ const NewsAndEvents = () => {
             const localizedParagraph = getLocalizedContent(item.paragraph);
 
             return (
-              <Card key={item._id} className="overflow-hidden hover:shadow-lg transition-shadow">
+              <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
                 <div className="aspect-video overflow-hidden bg-gray-100">
                   {youtubeId ? (
                     <iframe
@@ -117,7 +117,7 @@ const NewsAndEvents = () => {
                   <Button
                     variant="link"
                     className="mt-2 p-0 text-[#cf6439] font-bold hover:underline"
-                    onClick={() => navigate(`/details/${item._id}`)}
+                    onClick={() => navigate(`/details/${item.id}`)}
                   >
                     {t("Read More")}
                   </Button>

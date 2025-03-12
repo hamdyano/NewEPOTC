@@ -1,18 +1,27 @@
 import express, { Request, Response } from "express";
 import verifyToken from "../middleware/authMiddel";
-import Partnership from "../models/partnershipModel"; // You'll need to create this model
 import multer from "multer";
+import prisma from "../prisma";
+
 
 const router = express.Router();
 
-// Multer configuration for image upload
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
-// Get all partnerships
+interface AuthenticatedRequest extends Request {
+  email?: string;
+}
+
 router.get("/", async (req: Request, res: Response) => {
   try {
-    const partnerships = await Partnership.find().select("websiteUrl image");
+    const partnerships = await prisma.partnership.findMany({
+      select: {
+        id: true,
+        websiteUrl: true,
+        image: true
+      }
+    });
     res.status(200).json({ partnerships });
   } catch (error) {
     console.error("Error fetching partnerships:", error);
@@ -20,32 +29,29 @@ router.get("/", async (req: Request, res: Response) => {
   }
 });
 
-// Add new partnership (authenticated)
 router.post(
   "/add-partner",
   verifyToken,
   upload.single("image"),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { websiteUrl } = req.body;
       const email = req.email;
 
-      if (!websiteUrl || !req.file) {
-        return res
-          .status(400)
-          .json({ message: "Website URL and image are required" });
+      if (!websiteUrl || !req.file || !email) {
+        return res.status(400).json({ message: "Missing required fields" });
       }
 
-      // Convert image to Base64
       const imageBase64 = req.file.buffer.toString("base64");
 
-      const newPartner = new Partnership({
-        websiteUrl,
-        image: imageBase64,
-        email,
+      const newPartner = await prisma.partnership.create({
+        data: {
+          websiteUrl,
+          image: imageBase64,
+          user: { connect: { email } }
+        }
       });
 
-      await newPartner.save();
       res.status(201).json({ message: "Partner added successfully", newPartner });
     } catch (error) {
       console.error("Error adding partner:", error);
@@ -54,11 +60,14 @@ router.post(
   }
 );
 
-// Get authenticated user's partnerships
-router.get("/my-partners", verifyToken, async (req: Request, res: Response) => {
+router.get("/my-partners", verifyToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
     const email = req.email;
-    const partners = await Partnership.find({ email });
+    if (!email) return res.status(401).json({ message: "Unauthorized" });
+
+    const partners = await prisma.partnership.findMany({
+      where: { userEmail: email }
+    });
     res.status(200).json({ partners });
   } catch (error) {
     console.error("Error retrieving partners:", error);
@@ -66,29 +75,35 @@ router.get("/my-partners", verifyToken, async (req: Request, res: Response) => {
   }
 });
 
-// Update partnership
 router.put(
   "/update-partner/:id",
   verifyToken,
   upload.single("image"),
-  async (req: Request, res: Response) => {
+  async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { id } = req.params;
+      const id = parseInt(req.params.id);
       const { websiteUrl } = req.body;
       const email = req.email;
 
-      const partner = await Partnership.findById(id);
+      if (isNaN(id)) return res.status(400).json({ message: "Invalid ID format" });
+      if (!email) return res.status(401).json({ message: "Unauthorized" });
+
+      const partner = await prisma.partnership.findUnique({
+        where: { id }
+      });
+
       if (!partner) return res.status(404).json({ message: "Partner not found" });
-      if (partner.email !== email) return res.status(403).json({ message: "Unauthorized" });
+      if (partner.userEmail !== email) return res.status(403).json({ message: "Unauthorized" });
 
-      // Update fields
-      if (websiteUrl) partner.websiteUrl = websiteUrl;
-      if (req.file) {
-        partner.image = req.file.buffer.toString("base64");
-      }
+      const updatedPartner = await prisma.partnership.update({
+        where: { id },
+        data: {
+          websiteUrl: websiteUrl || partner.websiteUrl,
+          image: req.file ? req.file.buffer.toString("base64") : partner.image
+        }
+      });
 
-      await partner.save();
-      res.status(200).json({ message: "Partner updated successfully", partner });
+      res.status(200).json({ message: "Partner updated successfully", partner: updatedPartner });
     } catch (error) {
       console.error("Error updating partner:", error);
       res.status(500).json({ message: "Failed to update partner" });
@@ -96,17 +111,25 @@ router.put(
   }
 );
 
-// Delete partnership
-router.delete("/delete-partner/:id", verifyToken, async (req: Request, res: Response) => {
+router.delete("/delete-partner/:id", verifyToken, async (req: AuthenticatedRequest, res: Response) => {
   try {
-    const { id } = req.params;
+    const id = parseInt(req.params.id);
     const email = req.email;
 
-    const partner = await Partnership.findById(id);
-    if (!partner) return res.status(404).json({ message: "Partner not found" });
-    if (partner.email !== email) return res.status(403).json({ message: "Unauthorized" });
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid ID format" });
+    if (!email) return res.status(401).json({ message: "Unauthorized" });
 
-    await partner.deleteOne();
+    const partner = await prisma.partnership.findUnique({
+      where: { id }
+    });
+
+    if (!partner) return res.status(404).json({ message: "Partner not found" });
+    if (partner.userEmail !== email) return res.status(403).json({ message: "Unauthorized" });
+
+    await prisma.partnership.delete({
+      where: { id }
+    });
+
     res.status(200).json({ message: "Partner deleted successfully" });
   } catch (error) {
     console.error("Error deleting partner:", error);
@@ -114,12 +137,20 @@ router.delete("/delete-partner/:id", verifyToken, async (req: Request, res: Resp
   }
 });
 
-// Get single partnership by ID
 router.get("/:id", async (req: Request, res: Response) => {
   try {
-    const { id } = req.params;
-    const partner = await Partnership.findById(id).select("websiteUrl image");
-    
+    const id = parseInt(req.params.id);
+    if (isNaN(id)) return res.status(400).json({ message: "Invalid ID format" });
+
+    const partner = await prisma.partnership.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        websiteUrl: true,
+        image: true
+      }
+    });
+
     if (!partner) return res.status(404).json({ message: "Partner not found" });
     res.status(200).json({ partner });
   } catch (error) {
@@ -129,3 +160,9 @@ router.get("/:id", async (req: Request, res: Response) => {
 });
 
 export default router;
+
+
+
+
+
+

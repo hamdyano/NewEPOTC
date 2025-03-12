@@ -20,7 +20,7 @@ import {
 } from "@radix-ui/react-dialog";
 
 interface NewsItem {
-  _id: string;
+  id: number;
   title: { en: string; ar: string; fr: string };
   paragraph: { en: string; ar: string; fr: string };
   image: string | null;
@@ -74,11 +74,11 @@ const MyNews = () => {
     }
   };
 
-  const handleDelete = async (newsId: string) => {
+  const handleDelete = async (newsId: number) => {
     if (window.confirm(t("confirm.deleteNews"))) {
       try {
         await deleteNews(newsId);
-        setNews(news.filter((item) => item._id !== newsId));
+        setNews(news.filter((item) => item.id !== newsId));
         toast.success(t("success.newsDeleted"));
       } catch (err) {
         toast.error(err instanceof Error ? err.message : t("error.deleteNews"));
@@ -86,7 +86,7 @@ const MyNews = () => {
     }
   };
 
-  const handleUpdate = async (newsId: string, formData: FormData) => {
+  const handleUpdate = async (newsId: number, formData: FormData) => {
     try {
       await updateNews(newsId, formData);
       await loadNews();
@@ -274,7 +274,7 @@ const MyNews = () => {
       if (selectedImage) formData.append("image", selectedImage);
       if (youtubeLink) formData.append("youtubeLink", youtubeLink);
 
-      await handleUpdate(newsItem._id, formData);
+      await handleUpdate(newsItem.id, formData);
     };
 
     return (
@@ -401,7 +401,7 @@ const MyNews = () => {
 
             return (
               <Card
-                key={item._id}
+                key={item.id}
                 className="overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="aspect-video overflow-hidden bg-gray-100">
@@ -453,14 +453,14 @@ const MyNews = () => {
                         {t("Edit")}
                       </Button>
                     </DialogTrigger>
-                    {editingNews && editingNews._id === item._id && (
+                    {editingNews && editingNews.id === item.id && (
                       <EditDialog newsItem={editingNews} />
                     )}
                   </Dialog>
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDelete(item._id)}
+                    onClick={() => handleDelete(item.id)}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     {t("Delete")}
@@ -478,7 +478,7 @@ const MyNews = () => {
 export default MyNews;
 
 interface NewsItem {
-  _id: string;
+  id: number;
   title: {
     en: string;
     ar: string;

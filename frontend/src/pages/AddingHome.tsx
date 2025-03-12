@@ -20,13 +20,15 @@ import {
 } from "@radix-ui/react-dialog";
 
 interface TopicItem {
-  _id: string;
+  id: number; // Changed from _id
   title: { en: string; ar: string; fr: string };
   paragraph: { en: string; ar: string; fr: string };
   image: string | null;
   youtubeLink: string | null;
   email: string;
-  createdAt: Date;
+  createdAt: string;
+  topicId:number;
+
 }
 
 const AddingHome = () => {
@@ -72,11 +74,11 @@ const AddingHome = () => {
     }
   };
 
-  const handleDelete = async (topicId: string) => {
+  const handleDelete = async (topicId: number) => {
     if (window.confirm(t("confirm.deleteTopic"))) {
       try {
         await deleteTopic(topicId);
-        setTopics(topics.filter((item) => item._id !== topicId));
+        setTopics(topics.filter((item) => item.id !== parseInt(topicId)));
         toast.success(t("success.topicDeleted"));
       } catch (err) {
         toast.error(err instanceof Error ? err.message : t("error.deleteTopic"));
@@ -84,7 +86,7 @@ const AddingHome = () => {
     }
   };
 
-  const handleUpdate = async (topicId: string, formData: FormData) => {
+  const handleUpdate = async (topicId: number, formData: FormData) => {
     try {
       await updateTopic(topicId, formData);
       await loadTopics();
@@ -256,7 +258,7 @@ const AddingHome = () => {
       if (selectedImage) formData.append("image", selectedImage);
       if (youtubeLink) formData.append("youtubeLink", youtubeLink);
 
-      await handleUpdate(topicItem._id, formData);
+      await handleUpdate(topicItem.id.toString(), formData);
     };
 
     return (
@@ -373,7 +375,7 @@ const AddingHome = () => {
 
             return (
               <Card
-                key={item._id}
+                key={item.id}
                 className="overflow-hidden hover:shadow-lg transition-shadow"
               >
                 <div className="aspect-video overflow-hidden bg-gray-100">
@@ -425,14 +427,14 @@ const AddingHome = () => {
                         {t("Edit")}
                       </Button>
                     </DialogTrigger>
-                    {editingTopic && editingTopic._id === item._id && (
+                    {editingTopic && editingTopic.id === item.id && (
                       <EditDialog topicItem={editingTopic} />
                     )}
                   </Dialog>
                   <Button
                     variant="destructive"
                     size="sm"
-                    onClick={() => handleDelete(item._id)}
+                    onClick={() => handleDelete(item.id)}
                   >
                     <Trash2 className="h-4 w-4 mr-2" />
                     {t("Delete")}

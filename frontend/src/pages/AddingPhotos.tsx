@@ -9,7 +9,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 interface PhotoItem {
-  _id: string;
+  id: number;
   image: string;
   email: string;
 }
@@ -51,11 +51,11 @@ const AddingPhotos = () => {
     }
   };
 
-  const handleDelete = async (photoId: string) => {
+  const handleDelete = async (photoId: number) => {
     if (window.confirm('Are you sure you want to delete this photo?')) {
       try {
         await deletePhoto(photoId);
-        setPhotos(photos.filter(item => item._id !== photoId));
+        setPhotos(photos.filter(item => item.id !== photoId));
         toast.success('Photo deleted successfully!');
       } catch (err) {
         toast.error(err instanceof Error ? err.message : 'Failed to delete photo');
@@ -124,7 +124,7 @@ const AddingPhotos = () => {
         formData.append('image', selectedImage);
       }
 
-      await handleUpdate(photo._id, formData);
+      await handleUpdate(photo.id, formData);
     };
 
     return (
@@ -179,7 +179,7 @@ const AddingPhotos = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {photos.map((item) => (
-            <Card key={item._id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card key={item.id} className="overflow-hidden hover:shadow-lg transition-shadow">
               <div className="aspect-video overflow-hidden">
                 <img
                   src={`data:image/png;base64,${item.image}`}
@@ -199,14 +199,14 @@ const AddingPhotos = () => {
                       Edit
                     </Button>
                   </DialogTrigger>
-                  {editingPhoto && editingPhoto._id === item._id && (
+                  {editingPhoto && editingPhoto.id === item.id && (
                     <EditDialog photo={editingPhoto} />
                   )}
                 </Dialog>
                 <Button 
                   variant="destructive" 
                   size="sm"
-                  onClick={() => handleDelete(item._id)}
+                  onClick={() => handleDelete(item.id)}
                 >
                   <Trash2 className="h-4 w-4 mr-2" />
                   Delete

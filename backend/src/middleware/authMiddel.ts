@@ -1,18 +1,22 @@
 import { NextFunction, Request, Response } from "express";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import jwt from "jsonwebtoken";
 
-// Extend Express Request interface to include userId and email
+// Extended type declarations
 declare global {
   namespace Express {
     interface Request {
-      userId?: string; // Optional userId property
-      email?: string;  // Optional email property
+      userId?: number;  // Changed to numeric ID
+      email?: string;
     }
   }
 }
 
+interface JwtPayload {
+  userId: number;      // Numeric ID type
+  email: string;
+}
+
 const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
-  // Extract token from cookies or Authorization header
   const token = req.cookies?.auth_token || req.header("Authorization")?.replace("Bearer ", "");
 
   if (!token) {
@@ -21,21 +25,32 @@ const verifyToken = (req: Request, res: Response, next: NextFunction): void => {
   }
 
   try {
-    // Verify token and extract payload
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY as string) as JwtPayload;
+    
+    // Validate numeric ID format
+    if (typeof decoded.userId !== 'number') {
+      throw new Error("Invalid user ID format in token");
+    }
 
-    // Attach userId and email to the request object
     req.userId = decoded.userId;
     req.email = decoded.email;
 
-    next(); // Pass control to the next middleware or route
+    next();
   } catch (error) {
     console.error("Token verification failed:", error);
-    res.status(401).json({ message: "Unauthorized: Invalid token" });
+    
+    // Special handling for numeric ID mismatch
+    const errorMessage = error instanceof Error && error.message.includes("ID format") 
+      ? "Invalid authentication token format"
+      : "Unauthorized: Invalid token";
+
+    res.status(401).json({ message: errorMessage });
   }
 };
 
 export default verifyToken;
+
+
 
 
 

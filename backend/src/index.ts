@@ -1,7 +1,7 @@
 import express , {Request,Response}from "express";
 import cors from "cors";
 import "dotenv/config";
-import mongoose from "mongoose";
+import { PrismaClient } from '@prisma/client';
 import userRoute from "./routes/userRoute";
 import authRoute from "./routes/authRoute";
 import newsRoute from "./routes/newsRoute";
@@ -12,8 +12,8 @@ import path from "path";
 import videosRoute from "./routes/videosRoute";
 import homeRoute from "./routes/homeRoute";
 
-mongoose.connect(process.env.MONGODB_CONNECTION_STRING as string).then(() => console.log("connected to database"));
 
+const prisma = new PrismaClient();
 const app = express();
 
 
@@ -23,7 +23,7 @@ app.use(express.urlencoded({ extended: true }));
 
 
  
-
+// CORS
  app.use(
   cors({
       origin: "http://localhost:5173", // Allow frontend origin
@@ -32,6 +32,8 @@ app.use(express.urlencoded({ extended: true }));
       allowedHeaders: ["Content-Type", "Authorization"], // Allowed headers
   })
 );
+
+
 
 
 
@@ -62,6 +64,18 @@ res.send({message:" healh ok "})
 })
 
 
+async function checkDatabaseConnection() {
+  try {
+    await prisma.$connect();
+    console.log('Connected to PostgreSQL database via Prisma');
+    await prisma.$disconnect();
+  } catch (error) {
+    console.error('Database connection error:', error);
+    process.exit(1);
+  }
+}
+
+checkDatabaseConnection();
 
 app.listen(8000, ()=> {
     console.log("server started on localhost :8000");
