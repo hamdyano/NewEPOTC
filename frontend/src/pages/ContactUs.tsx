@@ -1,8 +1,13 @@
+import { useTranslation } from "react-i18next";
+
 const ContactUs = () => {
+
+    const { t } = useTranslation();
+    
   return (
     <div className="max-w-3xl mx-auto p-8 bg-[#133355] rounded-2xl">
       <h1 className="text-3xl font-bold text-white text-center mb-8">
-        Contact Us
+      {t("Contact us")}
       </h1>
       <div className="bg-slate-200 p-8 rounded-2xl shadow-sm">
         {/* Phone Section */}
@@ -13,7 +18,7 @@ const ContactUs = () => {
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-blue-700 mb-2">Phone :</h2>
+            <h2 className="text-lg font-semibold text-blue-700 mb-2">{t("Phone")} :</h2>
             <p className="text-gray-600">(+202) 23840151 – 23840152</p>
           </div>
         </div>
@@ -28,7 +33,7 @@ const ContactUs = () => {
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-blue-700 mb-2">Email :</h2>
+            <h2 className="text-lg font-semibold text-blue-700 mb-2">{t("Email")} :</h2>
             <div className="space-y-1">
               <p className="text-blue-600 hover:underline">epotc@moi.gov.eg</p>
             
@@ -45,7 +50,7 @@ const ContactUs = () => {
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-blue-700 mb-2">Address :</h2>
+            <h2 className="text-lg font-semibold text-blue-700 mb-2">{t("Address")} :</h2>
             <p className="text-gray-600">Police Academy -  first settlement – new Cairo – Egypt </p>
           </div>
         </div>
@@ -58,7 +63,7 @@ const ContactUs = () => {
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-blue-700 mb-2">Post no. :</h2>
+            <h2 className="text-lg font-semibold text-blue-700 mb-2">{t("Post no.")}:</h2>
             <p className="text-gray-600">11865</p>
           </div>
         </div>

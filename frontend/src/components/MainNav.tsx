@@ -9,7 +9,7 @@ const MainNav = () => {
   const isRTL = i18n.language === "ar";
 
   // Use margin classes based on the language direction
-  const marginClass = isRTL ? "ml-12" : "mr-12";
+  const marginClass = isRTL ? "ml-32" : "mr-12";
   // For dropdown alignment: left for LTR, right for RTL
   const dropdownAlignClass = isRTL ? "right-0" : "left-0";
   // Text alignment in dropdown items
@@ -22,6 +22,8 @@ const MainNav = () => {
   const { isLoggedIn } = useAppContext();
 
   return (
+
+    
     <span
       className={`flex items-center space-x-4 ${
         isRTL ? "flex-row-reverse space-x-reverse" : ""
@@ -181,7 +183,7 @@ export default MainNav;
 
 
 
-/*  <Link
+/* for adding in mainNav  <Link
               className="flex items-center text-white px-3 font-bold hover:bg-blue-600"
               to="/AddingHome"
             >
