@@ -1,4 +1,4 @@
-import HcategVideo from "../assets/HcategVideo.mp4"
+/*import HcategVideo from "../assets/HcategVideo.mp4"
 
 
 const HeroVideo = () => {

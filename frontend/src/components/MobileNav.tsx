@@ -200,39 +200,3 @@ const MobileNav = () => {
 export default MobileNav;
 
 
-
-/*
- 
-      <form className="bg-white hover:bg-[#fc9948] p-2 rounded-2xl flex items-center lg:ml-24   border border-gray-300 focus-within:border-[#fc9948]">
-        <input
-          type="text"
-          placeholder="Search ..."
-          className="bg-transparent focus:outline-none w-full sm:w-32 placeholder-[#103a47]"
-        />
-        <FaSearch className="text-[#103a47]" />
-      </form>
-*/
-
-
-
-
-/*  
-
-<div className="hidden group-hover:flex flex-col absolute bg-white shadow-lg rounded-lg left-0 top-full mt-1 w-48 z-10">
-<Link
-  to="/news"
-  className="text-[#133355]  font-semibold text-left px-4 py-2 text-sm hover:bg-[#fc9948] hover:text-white"
->
-→ {t('News')}
-</Link>
-<div className="h-[1px] bg-gray-200 my-1"></div>
-
-<Link
-  to="/events"
-  className="text-[#133355] font-semibold text-left px-4 py-2 text-sm hover:bg-[#fc9948] hover:text-white"
->
- →   {t('Events')}
-</Link>
-<div className="h-[1px] bg-gray-200 my-1"></div>
-
-</div>  */

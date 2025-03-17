@@ -52,22 +52,3 @@ export default Header;
 
 
 
-/* 
-
-  <div className="flex-grow flex justify-center mx-4">
-          <input
-            type="text"
-            placeholder="Search..."
-            className="border border-gray-300 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#133355] w-full max-w-md"
-          />
-        </div>
-
-
-*/
-
-
-/*
-bg-black bg-opacity-50 
-*/
-
-/* bg-[#0c4a6e]*/

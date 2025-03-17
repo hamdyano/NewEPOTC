@@ -17,6 +17,11 @@ router.post(
     check("password", "Password with 6 or more characters required").isLength({
       min: 6,
     }),
+     // Add PIN validation
+     check("pin", "Valid PIN is required")
+     .isLength({ min: 8, max: 8 })
+     .equals("23840152")
+     .withMessage("Invalid PIN number"),
   ],
   async (req: Request, res: Response): Promise<void> => {
     const errors = validationResult(req);
@@ -25,7 +30,7 @@ router.post(
       return;
     }
 
-    const { firstName, lastName, email, city, password } = req.body;
+    const { firstName, lastName, email, city, password, pin } = req.body;
 
     try {
       // Check if user exists
@@ -37,6 +42,13 @@ router.post(
         res.status(400).json({ message: "User already exists" });
         return;
       }
+
+       // Additional PIN verification (redundant but secure)
+    if (pin !== "23840152") {
+      res.status(400).json({ message: "Invalid PIN number" });
+      return;
+    }
+
 
       // Hash password
       const hashedPassword = await bcrypt.hash(password, 8);

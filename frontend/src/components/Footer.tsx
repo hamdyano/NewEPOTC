@@ -139,16 +139,3 @@ export default Footer;
 
 
 
-
-/*  <div className=" w-full md:w-1/4">
-          <h1 className=" font-medium text-xl pb-4 pt-5 md:pt-0">Contact Us</h1>
-          <nav className=" flex flex-col gap-2">
-            <Link to="/">
-              123 Elm Street, Suite 456 Springfield, IL 62701 United States
-            </Link>
-          
-            <Link to="/" >
-              +123-456-7890
-            </Link>
-          </nav>
-        </div>   */

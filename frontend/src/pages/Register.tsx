@@ -11,7 +11,7 @@ export type RegisterFormData = {
   city: string;
   password: string;
   confirmPassword: string;
-
+  pin: string; // Added PIN field
 };
 
 const Register = () => {
@@ -28,7 +28,7 @@ const Register = () => {
 
   const mutation = useMutation(apiClient.register, {
     onSuccess: async () => {
-     showToast({ message: "Registration Success!", type: "SUCCESS" });
+      showToast({ message: "Registration Success!", type: "SUCCESS" });
       await queryClient.invalidateQueries("validateToken");
       navigate("/");
     },
@@ -50,7 +50,7 @@ const Register = () => {
           <input
             className="border rounded w-full py-1 px-2 font-normal"
             {...register("firstName", { required: "This field is required" })}
-          ></input>
+          />
           {errors.firstName && (
             <span className="text-red-500">{errors.firstName.message}</span>
           )}
@@ -60,38 +60,55 @@ const Register = () => {
           <input
             className="border rounded w-full py-1 px-2 font-normal"
             {...register("lastName", { required: "This field is required" })}
-          ></input>
+          />
           {errors.lastName && (
             <span className="text-red-500">{errors.lastName.message}</span>
           )}
         </label>
       </div>
+      
       <label className="text-gray-700 text-sm font-bold flex-1">
         Email
         <input
           type="email"
           className="border rounded w-full py-1 px-2 font-normal"
           {...register("email", { required: "This field is required" })}
-        ></input>
+        />
         {errors.email && (
           <span className="text-red-500">{errors.email.message}</span>
         )}
       </label>
 
       <label className="text-gray-700 text-sm font-bold flex-1">
-        city
-          <input
-            className="border rounded w-full py-1 px-2 font-normal"
-            {...register("city", { required: "This field is required" })}
-          ></input>
-          {errors.lastName && (
-            <span className="text-red-500">{errors.lastName.message}</span>
-          )}
-        </label>
+        City
+        <input
+          className="border rounded w-full py-1 px-2 font-normal"
+          {...register("city", { required: "This field is required" })}
+        />
+        {errors.city && (
+          <span className="text-red-500">{errors.city.message}</span>
+        )}
+      </label>
 
+      {/* New PIN Field */}
+      <label className="text-gray-700 text-sm font-bold flex-1">
+        Registration PIN
+        <input
+          type="text"
+          className="border rounded w-full py-1 px-2 font-normal"
+          {...register("pin", {
+            required: "PIN is required",
+            pattern: {
+              value: /^23840152$/,
+              message: "Invalid registration PIN"
+            }
+          })}
+        />
+        {errors.pin && (
+          <span className="text-red-500">{errors.pin.message}</span>
+        )}
+      </label>
 
-
-      
       <label className="text-gray-700 text-sm font-bold flex-1">
         Password
         <input
@@ -104,11 +121,12 @@ const Register = () => {
               message: "Password must be at least 6 characters",
             },
           })}
-        ></input>
+        />
         {errors.password && (
           <span className="text-red-500">{errors.password.message}</span>
         )}
       </label>
+      
       <label className="text-gray-700 text-sm font-bold flex-1">
         Confirm Password
         <input
@@ -119,15 +137,16 @@ const Register = () => {
               if (!val) {
                 return "This field is required";
               } else if (watch("password") !== val) {
-                return "Your passwords do no match";
+                return "Your passwords do not match";
               }
             },
           })}
-        ></input>
+        />
         {errors.confirmPassword && (
           <span className="text-red-500">{errors.confirmPassword.message}</span>
         )}
       </label>
+      
       <span>
         <button
           type="submit"
@@ -141,3 +160,11 @@ const Register = () => {
 };
 
 export default Register;
+
+
+
+
+
+
+
+

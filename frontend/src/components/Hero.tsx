@@ -1,4 +1,4 @@
-//import newhero from "../assets/newhero.jpg";
+
 import DarkHero from "../assets/DarkHero.jpg";
 
 

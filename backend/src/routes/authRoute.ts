@@ -128,12 +128,65 @@ router.put("/update", verifyToken, async (req: Request, res: Response) => {
 });
 
 
+// Password Reset Endpoint
+router.post(
+  "/reset-password",
+  [
+    check("email", "Valid email is required").isEmail(),
+    check("pin", "PIN is required").notEmpty(),
+    check("newPassword", "Password must be at least 6 characters").isLength({ min: 6 }),
+    check("confirmPassword", "Passwords must match").custom((value, { req }) => {
+      return value === req.body.newPassword;
+    }),
+  ],
+  async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: errors.array() });
+    }
+
+    const { email, pin, newPassword } = req.body;
+    const STATIC_PIN = "23840152"; // Consider moving to environment variables
+
+    try {
+      // Validate PIN
+      if (pin !== STATIC_PIN) {
+        return res.status(400).json({ message: "Invalid PIN" });
+      }
+
+      // Find user by email
+      const user = await prisma.user.findUnique({ where: { email } });
+      if (!user) {
+        return res.status(400).json({ message: "User not found" });
+      }
+
+      // Hash new password
+      const hashedPassword = await bcrypt.hash(newPassword, 8);
+
+      // Update user password
+      await prisma.user.update({
+        where: { email },
+        data: { password: hashedPassword },
+      });
+
+      res.status(200).json({ message: "Password updated successfully" });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  }
+);
+
+
+
 router.post("/logout", (req: Request, res: Response) => {
   res.cookie("auth_token", "", {
     expires: new Date(0),
   });
   res.send();
 });
+
+
 
 
 

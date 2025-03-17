@@ -57,17 +57,23 @@ export interface VideoItem {
 //               AUTHENTICATION
 // =============================================
 
-export const register = async (formData: RegisterFormData) => {
+
+export const register = async (formData: RegisterFormData & { pin: string }) => {
   const response = await fetch(`${API_BASE_URL}/api/users/register`, {
     method: "POST",
     credentials: "include",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(formData),
+    body: JSON.stringify({
+      ...formData,
+      pin: formData.pin // Forward the PIN from the form
+    }),
   });
 
   const responseBody = await response.json();
   if (!response.ok) throw new Error(responseBody.message);
 };
+
+
 
 export const signIn = async (formData: SignInFormData) => {
   const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
@@ -102,6 +108,25 @@ export const validateToken = async () => {
     throw error;
   }
   
+};
+
+// Add this in your api-client.ts file (under authentication section)
+export const resetPassword = async (formData: {
+  email: string;
+  pin: string;
+  newPassword: string;
+  confirmPassword: string;
+}) => {
+  const response = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(formData),
+  });
+
+  const responseBody = await response.json();
+  if (!response.ok) throw new Error(responseBody.message);
+  return responseBody;
 };
 
 
